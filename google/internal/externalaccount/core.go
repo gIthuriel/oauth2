@@ -56,15 +56,17 @@ type CredentialSource struct {
 }
 
 func (cs CredentialSource) instance() baseCredentialSource {
-	/* if cs.EnvironmentID == "awsX" {
-		return awsCredentialSource{EnvironmentID:cs.EnvironmentID, RegionURL:cs.RegionURL, RegionalCredVerificationURL: cs.RegionalCredVerificationURL, CredVerificationURL:cs.CredVerificationURL}
-	} else */if cs.File != "" {
+	if cs.EnvironmentID == "awsX" {
+		return nil
+		//return awsCredentialSource{EnvironmentID:cs.EnvironmentID, RegionURL:cs.RegionURL, RegionalCredVerificationURL: cs.RegionalCredVerificationURL, CredVerificationURL:cs.CredVerificationURL}
+	} else if cs.File != "" {
 		return fileCredentialSource{File:cs.File}
-	} else {return nil}/* else if cs.URL != "" {
-		return urlCredentialSource{URL:cs.URL, Headers:cs.Headers}
+	} else if cs.URL != "" {
+		return nil
+		//return urlCredentialSource{URL:cs.URL, Headers:cs.Headers}
 	} else {
 		return nil
-	} */
+	}
 }
 
 type baseCredentialSource interface {
