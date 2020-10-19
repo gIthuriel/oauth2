@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"golang.org/x/oauth2"
-	externalaccount "golang.org/x/oauth2/google/internal/oauth"
 	"net/http"
 	"time"
 )
@@ -90,7 +89,7 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 	if err != nil {
 		return &oauth2.Token{}, err
 	}
-	stsRequest := externalaccount.STSTokenExchangeRequest{
+	stsRequest := STSTokenExchangeRequest{
 		GrantType: "urn:ietf:params:oauth:grant-type:token-exchange",
 		Audience: conf.Audience,
 		Scope: conf.Scopes,
@@ -100,12 +99,12 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 	}
 	header := make(http.Header)
 	header.Add("Content-Type", "application/x-www-form-urlencoded")
-	clientAuth := externalaccount.ClientAuthentication{
+	clientAuth := ClientAuthentication{
 		AuthStyle: oauth2.AuthStyleInHeader,
 		ClientID: conf.ClientID,
 		ClientSecret: conf.ClientSecret,
 	}
-	stsResp, err := externalaccount.ExchangeToken(ts.ctx, conf.TokenURL, &stsRequest, clientAuth, header, nil)
+	stsResp, err := ExchangeToken(conf.TokenURL, &stsRequest, clientAuth, header, nil)
 	if err != nil {
 		fmt.Errorf("oauth2/google: %s", err.Error())
 	}
