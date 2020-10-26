@@ -58,6 +58,8 @@ func (cs CredentialSource) instance() baseCredentialSource {
 	if cs.EnvironmentID == "awsX" {
 		return nil
 		//return awsCredentialSource{EnvironmentID:cs.EnvironmentID, RegionURL:cs.RegionURL, RegionalCredVerificationURL: cs.RegionalCredVerificationURL, CredVerificationURL:cs.CredVerificationURL}
+	} else if cs.File == "internalTestingFile" {
+		return testCredentialSource{}
 	} else if cs.File != "" {
 		return fileCredentialSource{File:cs.File}
 	} else if cs.URL != "" {
@@ -72,8 +74,6 @@ type baseCredentialSource interface {
 	retrieveSubjectToken(c *Config) (string, error)
 }
 
-
-// The following struct and methods are worth reviewing here though they're not exposed.
 
 // tokenSource is the source that handles 3PI credentials.
 type tokenSource struct {
@@ -117,7 +117,7 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 		if err != nil {
 			fmt.Errorf("google/oauth2: got invalid expiry from security token service")
 		}
-		accessToken.Expiry = time.Now().Add(time.Duration(stsResp.ExpiresIn)*time.Second) //TODO: Does this actually work properly!?!??
+		accessToken.Expiry = time.Now().Add(time.Duration(stsResp.ExpiresIn)*time.Second)
 	}
 	if stsResp.RefreshToken != "" {
 		accessToken.RefreshToken = stsResp.RefreshToken
