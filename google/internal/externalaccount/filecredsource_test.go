@@ -13,7 +13,7 @@ var testFileConfig = Config{
 	CredentialSource: fileSource,
 }
 var fileSource = CredentialSource{
-	File: "../..testdata/externalaccount/file_credentials.json",
+	File: "../../testdata/externalaccount/file_credentials.json",
 }
 
 func TestRetrieveFileSubjectToken(t *testing.T) {
@@ -22,6 +22,7 @@ func TestRetrieveFileSubjectToken(t *testing.T) {
 	if err != nil {
 		t.Errorf("Method retrieveSubjectToken for type fileCredentialSource failed; %e", err)
 	}
+
 
 }
 

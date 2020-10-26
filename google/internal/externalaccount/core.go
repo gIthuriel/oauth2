@@ -122,7 +122,6 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 	if stsResp.RefreshToken != "" {
 		accessToken.RefreshToken = stsResp.RefreshToken
 	}
-	fmt.Printf("Token result: %+v\n\n",accessToken)
 	return accessToken, nil
 }
 

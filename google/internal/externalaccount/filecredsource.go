@@ -16,7 +16,7 @@ type fileCredentialSource struct {
 func (cs fileCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
 	tokenFile, err := os.Open(cs.File)
 	if err != nil {
-		fmt.Printf("Failed to open credential file %s\n", cs.File) //TODO: Change error logging to not use fmt.Print
+		fmt.Errorf("Failed to open credential file %s\n", cs.File)
 	}
 	tokenBytes, _ := ioutil.ReadAll(tokenFile)
 	var output string
