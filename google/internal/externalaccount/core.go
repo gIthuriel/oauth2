@@ -32,8 +32,13 @@ func (c *Config) TokenSource(ctx context.Context) oauth2.TokenSource {
 	return ts
 }
 
+//Subject token file types
+const (
+	fileTypeText = "text"
+	fileTypeJSON = "json"
+)
 type format struct {
-	// When not provided "text" type is assumed.
+	// Either "text" or "json".  When not provided "text" type is assumed.
 	Type string `json:"type"`
 	// Only required for JSON.
 	// This would be "access_token" for azure.
