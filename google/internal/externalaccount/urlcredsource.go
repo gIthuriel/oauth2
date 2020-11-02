@@ -6,5 +6,6 @@ type urlCredentialSource struct {
 }
 
 func (cs urlCredentialSource) retrieveSubjectToken(c *Config) string {
-	
+
+	return ""
 }

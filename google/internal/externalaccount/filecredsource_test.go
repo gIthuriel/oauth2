@@ -1,6 +1,9 @@
 package externalaccount
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 var testFileConfig = Config{
 	Audience: "32555940559.apps.googleusercontent.com",
@@ -13,16 +16,19 @@ var testFileConfig = Config{
 	//CredentialSource: fileSource,
 }
 type fsTest struct {
+	name string
 	cs CredentialSource
 	want string
 }
 var testFSUntyped = fsTest {
+	name: "UntypedFileSource",
 	cs: CredentialSource{
 		File: "../../testdata/externalaccount/3pi_cred.txt",
 	},
 	want: "street123",
 }
 var testFSTypeText = fsTest {
+	name: "TextFileSource",
 	cs: CredentialSource{
 		File: "../../testdata/externalaccount/3pi_cred.txt",
 		Format: format{Type: fileTypeText},
@@ -30,6 +36,7 @@ var testFSTypeText = fsTest {
 	want: "street123",
 }
 var testFSTypeJSON = fsTest {
+	name: "JSONFileSource",
 	cs: CredentialSource{
 		File: "../../testdata/externalaccount/3pi_cred.json",
 		Format: format{Type: fileTypeJSON, SubjectTokenFieldName: "SubjToken"},
@@ -48,7 +55,12 @@ func TestRetrieveFileSubjectToken_Untyped(t *testing.T) {
 			t.Errorf("Method retrieveSubjectToken for type fileCredentialSource failed; %e", err)
 		}
 		if out != test.want {
-			t.Errorf("Method retrieveSubjectToken for type fileCredentialSouce failed: expected %v but got %v", "street123", out)
+			t.Errorf("Test %v for method retrieveSubjectToken for type fileCredentialSouce failed: expected %v but got %v", test.name, test.want, out)
+			fmt.Println("newTest!!!!!!!!")
+			fmt.Println(out)
+			fmt.Println(len(out))
+			fmt.Println(test.want)
+			fmt.Println(len(test.want))
 		}
 	}
 }

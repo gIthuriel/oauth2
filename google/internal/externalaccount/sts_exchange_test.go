@@ -22,15 +22,15 @@ var tokenRequest = STSTokenExchangeRequest{
 	}{},
 	GrantType:          "urn:ietf:params:oauth:grant-type:token-exchange",
 	Resource:           "",
-	Audience:           "32555940559.apps.googleusercontent.com",
+	Audience:           "32555940559.apps.googleusercontent.com", //TODO: Make sure audience is correct in this test (might be mismatched)
 	Scope:              []string{"https://www.googleapis.com/auth/devstorage.full_control"},
 	RequestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
 	SubjectToken:       "Sample.Subject.Token",
 	SubjectTokenType:   "urn:ietf:params:oauth:token-type:jwt",
 }
 
-var stsTestrequestbody = "audience=32555940559.apps.googleusercontent.com&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control&subject_token=Sample.Subject.Token&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt"
-var stsTestresponseBody = `{"access_token":"Sample.Access.Token","issued_token_type":"urn:ietf:params:oauth:token-type:access_token","token_type":"Bearer","expires_in":3600,"scope":"https://www.googleapis.com/auth/cloud-platform"}`
+var requestbody = "audience=32555940559.apps.googleusercontent.com&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control&subject_token=Sample.Subject.Token&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt"
+var responseBody = `{"access_token":"Sample.Access.Token","issued_token_type":"urn:ietf:params:oauth:token-type:access_token","token_type":"Bearer","expires_in":3600,"scope":"https://www.googleapis.com/auth/cloud-platform"}`
 var expectedToken = STSTokenExchangeResponse{
 	AccessToken:     "Sample.Access.Token",
 	IssuedTokenType: "urn:ietf:params:oauth:token-type:access_token",
@@ -48,7 +48,7 @@ func TestExchangeToken(t *testing.T) {
 		}
 		headerAuth := r.Header.Get("Authorization")
 		if headerAuth != "Basic cmJyZ25vZ25yaG9uZ28zYmk0Z2I5Z2hnOWc6bm90c29zZWNyZXQ=" {
-			t.Errorf("Unexpected autohrization header, %v is found.", headerAuth)
+			t.Errorf("Unexpected authorization header, %v is found.", headerAuth)
 		}
 		headerContentType := r.Header.Get("Content-Type")
 		if headerContentType != "application/x-www-form-urlencoded" {
@@ -58,11 +58,11 @@ func TestExchangeToken(t *testing.T) {
 		if err != nil {
 			t.Errorf("Failed reading request body: %s.", err)
 		}
-		if string(body) != stsTestrequestbody {
+		if string(body) != requestbody {
 			t.Errorf("Unexpected exchange payload, %v is found.", string(body))
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(stsTestresponseBody))
+		w.Write([]byte(responseBody))
 	}))
 
 	headers := make(map[string][]string)
@@ -77,4 +77,18 @@ func TestExchangeToken(t *testing.T) {
 		t.Errorf("mismatched messages received by mock server (-want +got): \n%v", diff)
 	}
 
+}
+
+func TestExchangeToken_Err(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("what's wrong with this response?"))
+	}))
+
+	headers := make(map[string][]string)
+	headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+	_, err := ExchangeToken(ts.URL, &tokenRequest, auth, headers, nil)
+	if err == nil {
+		t.Errorf("Expected handled error; instead got nil.")
+	}
 }
