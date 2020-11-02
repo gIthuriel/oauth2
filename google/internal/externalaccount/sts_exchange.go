@@ -46,7 +46,7 @@ func ExchangeToken(endpoint string, request *STSTokenExchangeRequest, authentica
 	var stsResp STSTokenExchangeResponse
 	err = json.Unmarshal(body, &stsResp)
 	if err != nil {
-		fmt.Println(err)
+		return &stsResp, err
 	}
 	return &stsResp, nil
 }

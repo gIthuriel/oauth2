@@ -1,7 +1,6 @@
 package externalaccount
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -46,7 +45,7 @@ var testFSTypeJSON = fsTest {
 var fileSourceTests = []fsTest{testFSUntyped, testFSTypeText, testFSTypeJSON}
 
 
-func TestRetrieveFileSubjectToken_Untyped(t *testing.T) {
+func TestRetrieveFileSubjectToken(t *testing.T) {
 	for _, test := range fileSourceTests {
 		testFileConfig.CredentialSource = test.cs
 
@@ -56,11 +55,6 @@ func TestRetrieveFileSubjectToken_Untyped(t *testing.T) {
 		}
 		if out != test.want {
 			t.Errorf("Test %v for method retrieveSubjectToken for type fileCredentialSouce failed: expected %v but got %v", test.name, test.want, out)
-			fmt.Println("newTest!!!!!!!!")
-			fmt.Println(out)
-			fmt.Println(len(out))
-			fmt.Println(test.want)
-			fmt.Println(len(test.want))
 		}
 	}
 }

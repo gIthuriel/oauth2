@@ -27,8 +27,6 @@ func (cs fileCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
 	case "json":
 		jsonData := make(map[string]interface{})
 		json.Unmarshal(tokenBytes, &jsonData)
-		fmt.Println(string(tokenBytes))
-		fmt.Printf("%+v", jsonData)
 		if val, ok := jsonData[c.CredentialSource.Format.SubjectTokenFieldName]; !ok {
 			return "", errors.New("oauth2/google: provided subject_token_field_name not found in credentials")
 		} else {
