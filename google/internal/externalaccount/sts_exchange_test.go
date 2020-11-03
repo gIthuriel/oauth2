@@ -1,6 +1,11 @@
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package externalaccount
 
 import (
+	"context"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/oauth2"
 	"io/ioutil"
@@ -48,7 +53,7 @@ func TestExchangeToken(t *testing.T) {
 		}
 		headerAuth := r.Header.Get("Authorization")
 		if headerAuth != "Basic cmJyZ25vZ25yaG9uZ28zYmk0Z2I5Z2hnOWc6bm90c29zZWNyZXQ=" {
-			t.Errorf("Unexpected authorization header, %v is found.", headerAuth)
+			t.Errorf("Unexpected autohrization header, %v is found.", headerAuth)
 		}
 		headerContentType := r.Header.Get("Content-Type")
 		if headerContentType != "application/x-www-form-urlencoded" {
@@ -68,7 +73,7 @@ func TestExchangeToken(t *testing.T) {
 	headers := make(map[string][]string)
 	headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
 
-	resp, err := ExchangeToken(ts.URL, &tokenRequest, auth, headers, nil)
+	resp, err := ExchangeToken(context.Background(), ts.URL, &tokenRequest, auth, headers, nil)
 	if err != nil {
 		t.Errorf("ExchangeToken failed with error: %s", err)
 	}
@@ -87,7 +92,7 @@ func TestExchangeToken_Err(t *testing.T) {
 
 	headers := make(map[string][]string)
 	headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
-	_, err := ExchangeToken(ts.URL, &tokenRequest, auth, headers, nil)
+	_, err := ExchangeToken(context.Background(), ts.URL, &tokenRequest, auth, headers, nil)
 	if err == nil {
 		t.Errorf("Expected handled error; instead got nil.")
 	}

@@ -8,12 +8,7 @@ import (
 	"testing"
 )
 
-type testCredentialSource struct {
-	File string
-}
-func (cs testCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
-	return "Sample.Subject.Token", nil
-}
+
 
 var testBaseCredSource = CredentialSource {
 	File: "internalTestingFile",

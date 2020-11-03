@@ -109,7 +109,7 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 		ClientID: conf.ClientID,
 		ClientSecret: conf.ClientSecret,
 	}
-	stsResp, err := ExchangeToken(conf.TokenURL, &stsRequest, clientAuth, header, nil)
+	stsResp, err := ExchangeToken(ts.ctx, conf.TokenURL, &stsRequest, clientAuth, header, nil)
 	if err != nil {
 		fmt.Errorf("oauth2/google: %s", err.Error())
 	}
@@ -132,3 +132,12 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 
 // NOTE: this method doesn't exist yet. It is being investigated to add this method to oauth2.TokenSource.
 //func (ts tokenSource) TokenInfo() (*oauth2.TokenInfo, error)
+
+
+// testCredentialSource is only used for testing, but must be defined here in order to avoid undefined errors when testing.
+type testCredentialSource struct {
+	File string
+}
+func (cs testCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
+	return "Sample.Subject.Token", nil
+}
