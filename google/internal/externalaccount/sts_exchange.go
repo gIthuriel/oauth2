@@ -37,7 +37,7 @@ func ExchangeToken(ctx context.Context, endpoint string, request *STSTokenExchan
 
 	authentication.InjectAuthentication(data, headers)
 	encodedData := data.Encode()
-	req, err := http.NewRequest("POST", endpoint, strings.NewReader(encodedData))
+	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, strings.NewReader(encodedData))
 	if err != nil {
 		fmt.Errorf("oauth2/google: failed to properly build http request: %v", err)
 	}
