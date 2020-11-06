@@ -68,8 +68,7 @@ func (cs CredentialSource) instance() baseCredentialSource {
 	} else if cs.File != "" {
 		return fileCredentialSource{File:cs.File}
 	} else if cs.URL != "" {
-		return nil
-		//return urlCredentialSource{URL:cs.URL, Headers:cs.Headers}
+		return urlCredentialSource{URL:cs.URL, Headers:cs.Headers}
 	} else {
 		return nil
 	}

@@ -1,4 +1,4 @@
-// Copyright 2015 The Go Authors. All rights reserved.
+// Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -34,7 +34,7 @@ var tokenRequest = STSTokenExchangeRequest{
 	SubjectTokenType:   "urn:ietf:params:oauth:token-type:jwt",
 }
 
-var requestbody = "audience=32555940559.apps.googleusercontent.com&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control&subject_token=Sample.Subject.Token&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt"
+var requestbody = "audience=32555940559.apps.googleusercontent.com&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&options=null&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control&subject_token=Sample.Subject.Token&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt"
 var responseBody = `{"access_token":"Sample.Access.Token","issued_token_type":"urn:ietf:params:oauth:token-type:access_token","token_type":"Bearer","expires_in":3600,"scope":"https://www.googleapis.com/auth/cloud-platform"}`
 var expectedToken = STSTokenExchangeResponse{
 	AccessToken:     "Sample.Access.Token",
@@ -48,23 +48,26 @@ var expectedToken = STSTokenExchangeResponse{
 func TestExchangeToken(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			t.Errorf("Unexpected request method, %v is found", r.Method)
+		}
 		if r.URL.String() != "/" {
-			t.Errorf("Unexpected request URL, %v is found.", r.URL)
+			t.Errorf("Unexpected request URL, %v is found", r.URL)
 		}
 		headerAuth := r.Header.Get("Authorization")
 		if headerAuth != "Basic cmJyZ25vZ25yaG9uZ28zYmk0Z2I5Z2hnOWc6bm90c29zZWNyZXQ=" {
-			t.Errorf("Unexpected autohrization header, %v is found.", headerAuth)
+			t.Errorf("Unexpected autohrization header, %v is found", headerAuth)
 		}
 		headerContentType := r.Header.Get("Content-Type")
 		if headerContentType != "application/x-www-form-urlencoded" {
-			t.Errorf("Unexpected Content-Type header, %v is found.", headerContentType)
+			t.Errorf("Unexpected Content-Type header, %v is found", headerContentType)
 		}
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			t.Errorf("Failed reading request body: %s.", err)
+			t.Errorf("Failed reading request body: %v.", err)
 		}
 		if string(body) != requestbody {
-			t.Errorf("Unexpected exchange payload, %v is found.", string(body))
+			t.Errorf("Unexpected exchange payload, %v is found", string(body))
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(responseBody))
@@ -75,7 +78,7 @@ func TestExchangeToken(t *testing.T) {
 
 	resp, err := ExchangeToken(context.Background(), ts.URL, &tokenRequest, auth, headers, nil)
 	if err != nil {
-		t.Errorf("ExchangeToken failed with error: %s", err)
+		t.Fatalf("ExchangeToken failed with error: %v", err)
 	}
 
 	if diff := cmp.Diff(expectedToken, *resp); diff != "" {

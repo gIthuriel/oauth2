@@ -12,21 +12,21 @@ var testFileConfig = Config{
 	ServiceAccountImpersonationURL: "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/service-gcs-admin@$PROJECT_ID.iam.gserviceaccount.com:generateAccessToken",
 	ClientSecret: "notsosecret",
 	ClientID: "rbrgnognrhongo3bi4gb9ghg9g",
-	//CredentialSource: fileSource,
 }
+
 type fsTest struct {
 	name string
 	cs CredentialSource
 	want string
 }
-var testFSUntyped = fsTest {
+var testFsUntyped = fsTest {
 	name: "UntypedFileSource",
 	cs: CredentialSource{
 		File: "../../testdata/externalaccount/3pi_cred.txt",
 	},
 	want: "street123",
 }
-var testFSTypeText = fsTest {
+var testFsTypeText = fsTest {
 	name: "TextFileSource",
 	cs: CredentialSource{
 		File: "../../testdata/externalaccount/3pi_cred.txt",
@@ -34,7 +34,7 @@ var testFSTypeText = fsTest {
 	},
 	want: "street123",
 }
-var testFSTypeJSON = fsTest {
+var testFsTypeJSON = fsTest {
 	name: "JSONFileSource",
 	cs: CredentialSource{
 		File: "../../testdata/externalaccount/3pi_cred.json",
@@ -42,16 +42,17 @@ var testFSTypeJSON = fsTest {
 	},
 	want: "321road",
 }
-var fileSourceTests = []fsTest{testFSUntyped, testFSTypeText, testFSTypeJSON}
+var fileSourceTests = []fsTest{testFsUntyped, testFsTypeText, testFsTypeJSON}
 
 
 func TestRetrieveFileSubjectToken(t *testing.T) {
 	for _, test := range fileSourceTests {
-		testFileConfig.CredentialSource = test.cs
+		tfc := testFileConfig
+		tfc.CredentialSource = test.cs
 
-		out, err := test.cs.instance().retrieveSubjectToken(&testFileConfig)
+		out, err := test.cs.instance().retrieveSubjectToken(&tfc)
 		if err != nil {
-			t.Errorf("Method retrieveSubjectToken for type fileCredentialSource failed; %e", err)
+			t.Errorf("Method retrieveSubjectToken for type fileCredentialSource in test %v failed; %e", test.name, err)
 		}
 		if out != test.want {
 			t.Errorf("Test %v for method retrieveSubjectToken for type fileCredentialSouce failed: expected %v but got %v", test.name, test.want, out)

@@ -12,7 +12,7 @@ import (
 
 type urlCredentialSource struct {
 	URL string
-	Headers map[string]interface{}
+	Headers map[string]string
 }
 
 func (cs urlCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
@@ -20,11 +20,8 @@ func (cs urlCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
 	req, err := http.NewRequest("GET", cs.URL, strings.NewReader(""))
 
 	for key, val := range cs.Headers {
-		if sval, ok := val.(string); ok { // Make sure that we have a string value
-			req.Header.Add(key, sval)
-		}
+		req.Header.Add(key, val)
 	}
-	//req.Header.Add("Content-Length", "0") TODO: not sure whether this needs to be added?
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Errorf("oauth2/google: invalid response when retrieving subject token: %v", err)
@@ -62,5 +59,5 @@ func (cs urlCredentialSource) retrieveSubjectToken(c *Config) (string, error) {
 	}
 
 
-	return "", nil
+	return output, nil
 }
