@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"golang.org/x/oauth2"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -43,8 +42,8 @@ func ExchangeToken(ctx context.Context, endpoint string, request *STSTokenExchan
 		fmt.Errorf("oauth2/google: failed to properly build http request: %v", err)
 		return nil, err
 	}
-	for key, _ := range headers {
-		for _, val := range headers.Values(key) {
+	for key, list := range headers {
+		for _, val := range list {
 			req.Header.Add(key, val)
 		}
 	}
@@ -57,17 +56,18 @@ func ExchangeToken(ctx context.Context, endpoint string, request *STSTokenExchan
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1<<20))
-	if err != nil {
-		fmt.Errorf("oauth2/google: invalid body in Secure Token Server response: %v", err)
-		return nil, err
-	}
+
+	bodyJson := json.NewDecoder(io.LimitReader(resp.Body, 1<<20))
 	var stsResp STSTokenExchangeResponse
-	err = json.Unmarshal(body, &stsResp)
-	if err != nil {
-		fmt.Errorf("oauth2/google: failed to unmarshal response body from Secure Token Server: %v", err)
-		return nil, err
+	for bodyJson.More() {
+		err = bodyJson.Decode(&stsResp)
+		if err != nil {
+			fmt.Errorf("oauth2/google: failed to unmarshal response body from Secure Token Server: %v", err)
+			return nil, err
+		}
 	}
+
+
 	return &stsResp, nil
 }
 

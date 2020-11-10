@@ -6,8 +6,6 @@ package externalaccount
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/oauth2"
 	"io/ioutil"
@@ -76,8 +74,8 @@ func TestExchangeToken(t *testing.T) {
 		w.Write([]byte(responseBody))
 	}))
 
-	headers := make(map[string][]string)
-	headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+	headers := http.Header{}
+	headers.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := ExchangeToken(context.Background(), ts.URL, &tokenRequest, auth, headers, nil)
 	if err != nil {
@@ -96,8 +94,8 @@ func TestExchangeToken_Err(t *testing.T) {
 		w.Write([]byte("what's wrong with this response?"))
 	}))
 
-	headers := make(map[string][]string)
-	headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+	headers := http.Header{}
+	headers.Add("Content-Type", "application/x-www-form-urlencoded")
 	_, err := ExchangeToken(context.Background(), ts.URL, &tokenRequest, auth, headers, nil)
 	if err == nil {
 		t.Errorf("Expected handled error; instead got nil.")
@@ -119,7 +117,7 @@ func TestExchangeToken_Opts(t *testing.T) {
 			t.Fatalf("Failed to parse request body: %v", err)
 		}
 
-
-
 	}))
+	headers := http.Header{}
+	headers.Add("Content-Type", "application/x-www-form-urlencoded")
 }
