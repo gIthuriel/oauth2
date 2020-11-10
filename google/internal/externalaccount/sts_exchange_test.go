@@ -6,11 +6,14 @@ package externalaccount
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
@@ -99,4 +102,24 @@ func TestExchangeToken_Err(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected handled error; instead got nil.")
 	}
+}
+/* Lean test specifically for options, as the other features are tested earlier. */
+func TestExchangeToken_Opts(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("Failed reading request body: %v.", err)
+		}
+		data, err := url.ParseQuery(string(body))
+		//TODO: !!!! Detect if the options are successfully sent, break the test if they aren't, return the usual STS response if I see all options?
+		//TODO: Or instead return a different token value if the Options aren't detected.  Then detect which token value I get.  Might be simpler to code.
+		if err != nil {
+			//w.Write([]byte(fmt.Sprintf("Failed to parse request body: %v", err)))
+			//return
+			t.Fatalf("Failed to parse request body: %v", err)
+		}
+
+
+
+	}))
 }

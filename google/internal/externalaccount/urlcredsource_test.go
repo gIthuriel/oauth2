@@ -56,7 +56,7 @@ func TestRetrieveURLSubjectToken_Text(t *testing.T) {
 
 	out, err := cs.instance().retrieveSubjectToken(&tfc)
 	if err != nil {
-		t.Fatalf("Failed to retrieve USRL subject token: %v", err)
+		t.Fatalf("Failed to retrieve URL subject token: %v", err)
 	}
 	if out != myURLToken {
 		t.Errorf("Recieved wrong subject token from URL; got %v but want %v", out, myURLToken)
@@ -91,19 +91,22 @@ func TestRetrieveURLSubjectToken_Untyped(t *testing.T) {
 
 func TestRetrieveURLSubjectToken_JSON(t *testing.T) {
 	type tokenResponse struct {
-		token string `SubjToken`
+		TestToken string `json:"SubjToken"`
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			t.Errorf("Unexpected request method, %v is found", r.Method)
 		}
-		resp := tokenResponse{token: "testTokenValue"}
-		jsonResp, _ := json.Marshal(resp)
+		resp := tokenResponse{TestToken: "testTokenValue"}
+		jsonResp, err := json.Marshal(resp)
+		if err != nil {
+			t.Errorf("Failed to marshal values: %v", err)
+		}
 		w.Write(jsonResp)
 	}))
 	cs := CredentialSource{
 		URL: ts.URL,
-		Format: format{Type: fileTypeJSON},
+		Format: format{Type: fileTypeJSON, SubjectTokenFieldName: "SubjToken"},
 	}
 	tfc := testFileConfig
 	tfc.CredentialSource = cs
@@ -112,7 +115,7 @@ func TestRetrieveURLSubjectToken_JSON(t *testing.T) {
 
 
 	if err != nil {
-		t.Fatalf("Failed to retrieve USRL subject token: %v", err)
+		t.Fatalf("Failed to retrieve URL subject token: %v", err)
 	}
 	if out != myURLToken {
 		t.Errorf("Recieved wrong subject token from URL; got %v but want %v", out, myURLToken)
