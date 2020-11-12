@@ -86,6 +86,11 @@ func TestExchangeToken(t *testing.T) {
 	if diff := cmp.Diff(expectedToken, *resp); diff != "" {
 		t.Errorf("mismatched messages received by mock server (-want +got): \n%v", diff)
 	}
+	if expectedToken != *resp {
+		t.Errorf("mismatched messages received by mock server.  \nWant: \n%v\n\nGot:\n%v", expectedToken, *resp)
+	}
+
+
 
 }
 
