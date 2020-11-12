@@ -6,6 +6,7 @@ package externalaccount
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/oauth2"
 	"io/ioutil"
@@ -102,6 +103,11 @@ func TestExchangeToken_Err(t *testing.T) {
 	}
 }
 /* Lean test specifically for options, as the other features are tested earlier. */
+type testOpts struct {
+	First string `json:"first"`
+	Second string `json:"second"`
+}
+var optsValues = [][]string{{"foo", "bar"},{"cat", "pan"}}
 func TestExchangeToken_Opts(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
@@ -109,15 +115,67 @@ func TestExchangeToken_Opts(t *testing.T) {
 			t.Errorf("Failed reading request body: %v.", err)
 		}
 		data, err := url.ParseQuery(string(body))
-		//TODO: !!!! Detect if the options are successfully sent, break the test if they aren't, return the usual STS response if I see all options?
-		//TODO: Or instead return a different token value if the Options aren't detected.  Then detect which token value I get.  Might be simpler to code.
 		if err != nil {
-			//w.Write([]byte(fmt.Sprintf("Failed to parse request body: %v", err)))
-			//return
 			t.Fatalf("Failed to parse request body: %v", err)
 		}
+		strOpts, ok := data["options"]
+		if !ok {
+			t.Errorf("Server didn't recieve an \"options\" field.")
+		} else if len(strOpts) < 1 {
+			t.Errorf("\"options\" field has length 0.")
+		}
+		var opts map[string]interface{}
+		err = json.Unmarshal([]byte(strOpts[0]), &opts)
+		if len(opts) < 2 {
+			t.Errorf("Too few options recieved.")
+		}
+
+		val, ok := opts["one"]
+		if !ok {
+			t.Errorf("Couldn't find first option parameter.")
+		} else {
+			tOpts1, ok := val.(testOpts)
+			if !ok {
+				t.Errorf("Failed to assert the first option parameter as type testOpts.")
+			} else {
+				if tOpts1.First != optsValues[0][0] {
+					t.Errorf("First value in first options field is incorrect; want %v but got %v", tOpts1.First, optsValues[0][0])
+				}
+				if tOpts1.Second != optsValues[0][1] {
+					t.Errorf("Second value in first options field is incorrect; want %v but got %v", tOpts1.Second, optsValues[0][1])
+				}
+			}
+		}
+
+		val2, ok := opts["two"]
+		if !ok {
+			t.Errorf("Couldn't find second option parameter.")
+		} else {
+			tOpts2, ok := val2.(testOpts)
+			if !ok {
+				t.Errorf("Failed to assert the second option parameter as type testOpts.")
+			} else {
+				if tOpts2.First != optsValues[1][0] {
+					t.Errorf("First value in second options field is incorrect; want %v but got %v", tOpts2.First, optsValues[1][0])
+				}
+				if tOpts2.Second != optsValues[1][1] {
+					t.Errorf("Second value in second options field is incorrect; want %v but got %v", tOpts2.Second, optsValues[1][1])
+				}
+			}
+		}
+
+		// Send a proper reply so that no other errors crop up.
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(responseBody))
 
 	}))
 	headers := http.Header{}
 	headers.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	firstOption := testOpts{optsValues[0][0], optsValues[0][1]}
+	secondOption := testOpts{optsValues[1][0], optsValues[1][1]}
+	inputOpts := make(map[string]interface{})
+	inputOpts["one"] = firstOption
+	inputOpts["two"] = secondOption
+	ExchangeToken(context.Background(), ts.URL, &tokenRequest, auth, headers, inputOpts)
 }
