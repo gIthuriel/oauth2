@@ -113,6 +113,7 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 		fmt.Errorf("oauth2/google: %s", err.Error())
 	}
 
+	// For impersonation: filterForAccount := regexp.Compile("https://iamcredentials\.googleapis\.com/v1/(.*):generateAccessToken") then regexp.FindSubmatch
 	accessToken := &oauth2.Token{
 		AccessToken: stsResp.AccessToken,
 		TokenType: stsResp.TokenType,
