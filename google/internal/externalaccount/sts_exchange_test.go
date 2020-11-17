@@ -135,15 +135,15 @@ func TestExchangeToken_Opts(t *testing.T) {
 		if !ok {
 			t.Errorf("Couldn't find first option parameter.")
 		} else {
-			tOpts1, ok := val.(testOpts)
+			tOpts1, ok := val.(map[string]interface{})
 			if !ok {
 				t.Errorf("Failed to assert the first option parameter as type testOpts.")
 			} else {
-				if tOpts1.First != optsValues[0][0] {
-					t.Errorf("First value in first options field is incorrect; want %v but got %v", tOpts1.First, optsValues[0][0])
+				if tOpts1["first"].(string) != optsValues[0][0] {
+					t.Errorf("First value in first options field is incorrect; want %v but got %v", tOpts1["first"].(string), optsValues[0][0])
 				}
-				if tOpts1.Second != optsValues[0][1] {
-					t.Errorf("Second value in first options field is incorrect; want %v but got %v", tOpts1.Second, optsValues[0][1])
+				if tOpts1["second"].(string) != optsValues[0][1] {
+					t.Errorf("Second value in first options field is incorrect; want %v but got %v", tOpts1["second"].(string), optsValues[0][1])
 				}
 			}
 		}
@@ -152,15 +152,15 @@ func TestExchangeToken_Opts(t *testing.T) {
 		if !ok {
 			t.Errorf("Couldn't find second option parameter.")
 		} else {
-			tOpts2, ok := val2.(testOpts)
+			tOpts2, ok := val2.(map[string]interface{})
 			if !ok {
 				t.Errorf("Failed to assert the second option parameter as type testOpts.")
 			} else {
-				if tOpts2.First != optsValues[1][0] {
-					t.Errorf("First value in second options field is incorrect; want %v but got %v", tOpts2.First, optsValues[1][0])
+				if tOpts2["first"].(string) != optsValues[1][0] {
+					t.Errorf("First value in second options field is incorrect; want %v but got %v", tOpts2["first"].(string), optsValues[1][0])
 				}
-				if tOpts2.Second != optsValues[1][1] {
-					t.Errorf("Second value in second options field is incorrect; want %v but got %v", tOpts2.Second, optsValues[1][1])
+				if tOpts2["second"].(string) != optsValues[1][1] {
+					t.Errorf("Second value in second options field is incorrect; want %v but got %v", tOpts2["second"].(string), optsValues[1][1])
 				}
 			}
 		}
