@@ -101,6 +101,11 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 		SubjectToken: subjectToken,
 		SubjectTokenType: conf.SubjectTokenType,
 	}
+	if conf.ServiceAccountImpersonationURL== "" {
+		stsRequest.Scope = conf.Scopes
+	} else { // Conducting service account impersonation
+		stsRequest.Scope = []string{"https://www.googleapis.com/auth/cloud-platform"}
+	}
 	header := make(http.Header)
 	header.Add("Content-Type", "application/x-www-form-urlencoded")
 	clientAuth := ClientAuthentication{
@@ -111,22 +116,29 @@ func (ts tokenSource) Token() (*oauth2.Token, error) {
 	stsResp, err := ExchangeToken(ts.ctx, conf.TokenURL, &stsRequest, clientAuth, header, nil)
 	if err != nil {
 		fmt.Errorf("oauth2/google: %s", err.Error())
+		return &oauth2.Token{}, err
 	}
 
-	// For impersonation: filterForAccount := regexp.Compile("https://iamcredentials\.googleapis\.com/v1/(.*):generateAccessToken") then regexp.FindSubmatch
+
 	accessToken := &oauth2.Token{
 		AccessToken: stsResp.AccessToken,
 		TokenType: stsResp.TokenType,
 	}
-	if stsResp.ExpiresIn != 0 {
-		if err != nil {
-			fmt.Errorf("google/oauth2: got invalid expiry from security token service")
-		}
+	if stsResp.ExpiresIn < 0 {
+		fmt.Errorf("google/oauth2: got invalid expiry from security token service")
+		// REVIEWERS: Should I return the Token that I actually got back here so that people could inspect the result even with a improper ExpiresIn response?
+		// Or is it more appropriate to still return an empty token: &oauth2.Token{} so that anybody who checks for an empty token as a sign of failure doesn't get confused.
+		return accessToken, nil
+	} else if stsResp.ExpiresIn > 0 {
 		accessToken.Expiry = time.Now().Add(time.Duration(stsResp.ExpiresIn)*time.Second)
 	}
+
 	if stsResp.RefreshToken != "" {
 		accessToken.RefreshToken = stsResp.RefreshToken
 	}
+	// For impersonation: filterForAccount := regexp.Compile("https://iamcredentials\.googleapis\.com/v1/(.*):generateAccessToken") then regexp.FindSubmatch
+	//
+
 	return accessToken, nil
 }
 

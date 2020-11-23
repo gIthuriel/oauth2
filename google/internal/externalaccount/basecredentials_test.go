@@ -47,25 +47,25 @@ func TestToken_Func(t *testing.T) {
 
 	targetServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		/*I'm not sure whether this testing is necessary or not.  There's an argument that it should be here for completeness,
-		 but it's also just mimcking similar testing done in sts_exchange_test.go
+		 but it's also just mimicking similar testing done in sts_exchange_test.go
 		 */
-		if r.URL.String() != "/" {
-			t.Errorf("Unexpected request URL, %v is found.", r.URL)
+		if got, want := r.URL.String(), "/"; got != want {
+			t.Errorf("Unexpected request URL: got %v but want %v", got, want)
 		}
 		headerAuth := r.Header.Get("Authorization")
-		if headerAuth != "Basic cmJyZ25vZ25yaG9uZ28zYmk0Z2I5Z2hnOWc6bm90c29zZWNyZXQ=" {
-			t.Errorf("Unexpected autohrization header, %v is found.", headerAuth)
+		if got, want := headerAuth, "Basic cmJyZ25vZ25yaG9uZ28zYmk0Z2I5Z2hnOWc6bm90c29zZWNyZXQ="; got != want {
+			t.Errorf("Unexpected autohrization header: got %v but want %v", got, want)
 		}
 		headerContentType := r.Header.Get("Content-Type")
-		if headerContentType != "application/x-www-form-urlencoded" {
-			t.Errorf("Unexpected Content-Type header, %v is found.", headerContentType)
+		if got, want := headerContentType, "application/x-www-form-urlencoded"; got != want {
+			t.Errorf("Unexpected Content-Type header: got %v but want %v", got, want)
 		}
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("Failed reading request body: %s.", err)
 		}
-		if string(body) != baseCredsRequestBody {
-			t.Errorf("Unexpected exchange payload: got %v, but wanted %v", string(body), baseCredsRequestBody)
+		if got, want := string(body), baseCredsRequestBody; got != want {
+			t.Errorf("Unexpected exchange payload: got %v but want %v", got, want)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(baseCredsResponseBody))
