@@ -29,7 +29,7 @@ func (c *Config) TokenSource(ctx context.Context) oauth2.TokenSource {
 		ctx: ctx,
 		conf: c,
 	}
-	return ts
+	return oauth2.ReuseTokenSource(nil, ts)
 }
 
 //Subject token file types

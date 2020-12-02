@@ -22,6 +22,7 @@ import (
 // be used to pass additional JSON-structured options to the remote server.
 func ExchangeToken(ctx context.Context, endpoint string, request *STSTokenExchangeRequest, authentication ClientAuthentication, headers http.Header, options map[string]interface{}) (*STSTokenExchangeResponse, error) {
 
+	fmt.Println("Getting a token!")
 	client := oauth2.NewClient(ctx, nil)
 
 	data := url.Values{}
